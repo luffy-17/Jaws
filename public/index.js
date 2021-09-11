@@ -41,10 +41,10 @@ function animate(){
 }
 
 let loader = new STLLoader();
-loader.load('/3dmodels/Baby_Yoda_v2.2.stl', (model)=>{
+loader.load('/3dmodels/FWMWK-lowerjaw.stl', (model)=>{
     object = new THREE.Mesh(
         model,
-        new THREE.MeshLambertMaterial({color: 0x00ff00})
+        new THREE.MeshLambertMaterial({color: 0xBEC4B5})
     );
     object.scale.set(0.1, 0.1, 0.1);
     object.position.set(0,-5,0);
