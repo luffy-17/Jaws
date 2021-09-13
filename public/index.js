@@ -2,12 +2,12 @@
 import * as THREE from './threejs/three.module.js';
 import {STLLoader} from './threejs/STLLoader.js';
 import {OrbitControls} from './threejs/OrbitControls.js';
-const scene = new THREE.Scene()
-scene.add(new THREE.AxesHelper(5))
+const scene = new THREE.Scene();
+scene.add(new THREE.AxesHelper(5));
 
-const light = new THREE.SpotLight()
-light.position.set(20, 20, 20)
-scene.add(light)
+const light = new THREE.SpotLight();
+light.position.set(20, 20, 20);
+scene.add(light);
 
 let light2 = new THREE.DirectionalLight(0xffffff);
 light.position.set(0,0,10);
@@ -22,57 +22,73 @@ const camera = new THREE.PerspectiveCamera(
     window.innerWidth / window.innerHeight,
     0.1,
     1000
-)
-camera.position.z = 10
+);
+camera.position.z = 10;
 
-const renderer = new THREE.WebGLRenderer()
-renderer.outputEncoding = THREE.sRGBEncoding
-renderer.setSize(window.innerWidth, window.innerHeight)
-document.body.appendChild(renderer.domElement)
+const renderer = new THREE.WebGLRenderer();
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement)
-controls.enableDamping = true
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 
 const material = new THREE.MeshPhysicalMaterial({
     color: 0xBEC4B5,
     roughness: 0.1,
-})
+});
 
-const loader = new STLLoader()
+const loader = new STLLoader();
+loader.load(
+    '3dmodels/FWMWK-upperjaw.stl',
+    function (geometry) {
+        const mesh_upperjaw = new THREE.Mesh(geometry, material);
+        mesh_upperjaw.scale.set(0.1, 0.1, 0.1);
+        mesh_upperjaw.position.set(0,1,0);
+        mesh_upperjaw.rotation.x = -Math.PI/2;
+        scene.add(mesh_upperjaw);
+    },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+    },
+    (error) => {
+        console.log(error);
+    }
+);
 loader.load(
     '3dmodels/FWMWK-lowerjaw.stl',
     function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material)
+        const mesh = new THREE.Mesh(geometry, material);
         mesh.scale.set(0.1, 0.1, 0.1);
-        mesh.position.set(0,-5,0);
+        mesh.position.set(0,-1,0);
         mesh.rotation.x = -Math.PI/2;
-        scene.add(mesh)
+        scene.add(mesh);
     },
     (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
     },
     (error) => {
-        console.log(error)
+        console.log(error);
     }
-)
+);
 
-window.addEventListener('resize', onWindowResize, false)
+window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight
-    camera.updateProjectionMatrix()
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    render()
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    render();
 }
 function animate() {
-    requestAnimationFrame(animate)
+    requestAnimationFrame(animate);
 
-    controls.update()
+    controls.update();
 
-    render()
+    render();
 }
 
 function render() {
-    renderer.render(scene, camera)
+    renderer.render(scene, camera);
 }
 
-animate()
+animate();
