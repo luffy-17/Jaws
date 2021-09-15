@@ -69,22 +69,6 @@ loader.load(
         console.log(error);
     }
 );
-loader.load(
-    '3dmodels/FWMWK-lowerjaw.stl',
-    function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.scale.set(0.1, 0.1, 0.1);
-        mesh.position.set(0,-1,0);
-        mesh.rotation.x = -Math.PI/2;
-        scene.add(mesh);
-    },
-    (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
-    },
-    (error) => {
-        console.log(error);
-    }
-);
 
 window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {

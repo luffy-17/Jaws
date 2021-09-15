@@ -53,22 +53,7 @@ function myFunction() {
     text.style.display = "none";
   }
 }
-loader.load(
-    '3dmodels/FWMWK-upperjaw.stl',
-    function (geometry) {
-        const mesh_upperjaw = new THREE.Mesh(geometry, material);
-        mesh_upperjaw.scale.set(0.1, 0.1, 0.1);
-        mesh_upperjaw.position.set(0,1,0);
-        mesh_upperjaw.rotation.x = -Math.PI/2;
-        scene.add(mesh_upperjaw);
-    },
-    (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
-    },
-    (error) => {
-        console.log(error);
-    }
-);
+
 loader.load(
     '3dmodels/FWMWK-lowerjaw.stl',
     function (geometry) {
