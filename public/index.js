@@ -1,38 +1,52 @@
 // jshint esversion:6
 import * as THREE from './threejs/three.module.js';
 import {STLLoader} from './threejs/STLLoader.js';
-import {OrbitControls} from './threejs/OrbitControls.js';
+import {TrackballControls} from './threejs/TrackballControls.js';
 import { GUI } from './threejs/dat.gui.module.js';
 
-const scene = new THREE.Scene();
-scene.add(new THREE.AxesHelper(5));
+let perspectiveCamera, orthographicCamera, controls;
+const params = {orthographicCamera: false};
+const frustumSize = 100;
 
-const light = new THREE.PointLight( 0xffffff, 1 );
+
+//
+// light.layers.enable( 0 );
+// light.layers.enable( 1 );
+
+const aspect = window.innerWidth / window.innerHeight;
+
+perspectiveCamera = new THREE.PerspectiveCamera(
+    75,
+    aspect,
+    0.1,
+    1000);
+
+perspectiveCamera.layers.enable( 0 ); // enabled by default
+perspectiveCamera.layers.enable( 1 );
+perspectiveCamera.position.set(0,0,-10);
+orthographicCamera = new THREE.OrthographicCamera(
+    frustumSize * aspect / -2,
+    frustumSize * aspect / 2,
+    frustumSize / 2,
+    frustumSize / -2,
+    0.1, 1000);
+orthographicCamera.layers.enable( 0 ); // enabled by default
+orthographicCamera.layers.enable( 1 );
+orthographicCamera.position.set(0,0,-10);
+
+// world
+
+let scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcccccc);
+
+const light = new THREE.DirectionalLight(0xffffff);
+light.position.set(-1, -1, -1);
+scene.add(light);
 light.layers.enable( 0 );
 light.layers.enable( 1 );
+scene.add(new THREE.AxesHelper(5));
 
 
-const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-);
-
-camera.layers.enable( 0 ); // enabled by default
-camera.layers.enable( 1 );
-camera.position.set(0,0,-10);
-
-scene.add( camera );
-camera.add( light );
-
-const renderer = new THREE.WebGLRenderer();
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
 
 const material = new THREE.MeshPhysicalMaterial({
     color: 0xBEC4B5,
@@ -89,29 +103,39 @@ loader.load(
     }
 );
 
+let renderer = new THREE.WebGLRenderer({});
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 const layers = {
 
   'toggle lower': function () {
 
-    camera.layers.toggle( 0 );
+    perspectiveCamera.layers.toggle( 0 );
+    orthographicCamera.layers.toggle(0);
 
   },
 
   'toggle upper': function () {
 
-    camera.layers.toggle( 1 );
+    perspectiveCamera.layers.toggle( 1 );
+    orthographicCamera.layers.toggle( 1 );
 
   },
 
   'enable all': function () {
 
-    camera.layers.enableAll();
+    perspectiveCamera.layers.enableAll();
+    orthographicCamera.layers.enableAll();
+
 
   },
 
   'disable all': function () {
 
-    camera.layers.disableAll();
+    perspectiveCamera.layers.disableAll();
+    orthographicCamera.layers.disableAll();
+
 
   }
 
@@ -122,14 +146,43 @@ gui.add( layers, 'toggle lower' );
 gui.add( layers, 'toggle upper' );
 gui.add( layers, 'enable all' );
 gui.add( layers, 'disable all' );
+gui.add(params, 'orthographicCamera').name('use orthographic').onChange(function(value) {
+  controls.dispose();
+  createControls(value ? orthographicCamera : perspectiveCamera);
+});
 
-window.addEventListener('resize', onWindowResize, false);
+window.addEventListener('resize', onWindowResize);
+createControls(perspectiveCamera);
+
+function createControls(camera) {
+
+  controls = new TrackballControls(camera, renderer.domElement);
+
+  controls.rotateSpeed = 1.0;
+  controls.zoomSpeed = 1.2;
+  controls.panSpeed = 0.8;
+
+  controls.keys = ['KeyA', 'KeyS', 'KeyD'];
+
+}
 
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    render();
+
+  const aspect = window.innerWidth / window.innerHeight;
+
+  perspectiveCamera.aspect = aspect;
+  perspectiveCamera.updateProjectionMatrix();
+
+  orthographicCamera.left = -frustumSize * aspect / 2;
+  orthographicCamera.right = frustumSize * aspect / 2;
+  orthographicCamera.top = frustumSize / 2;
+  orthographicCamera.bottom = -frustumSize / 2;
+  orthographicCamera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  controls.handleResize();
+
 }
 
 function animate() {
@@ -141,7 +194,8 @@ function animate() {
 }
 
 function render() {
-    renderer.render(scene, camera);
+  const camera = (params.orthographicCamera) ? orthographicCamera : perspectiveCamera;
+  renderer.render(scene, camera);
 }
 
 animate();
