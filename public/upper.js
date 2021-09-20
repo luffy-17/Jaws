@@ -5,17 +5,8 @@ import {OrbitControls} from './threejs/OrbitControls.js';
 const scene = new THREE.Scene();
 scene.add(new THREE.AxesHelper(5));
 
-const light = new THREE.SpotLight();
-light.position.set(20, 20, 20);
+const light = new THREE.HemisphereLight(0xffffff, 0x000000);
 scene.add(light);
-
-let light2 = new THREE.DirectionalLight(0xffffff);
-light.position.set(0,0,10);
-scene.add(light2);
-
-let light3 = new THREE.DirectionalLight(0xffffff);
-light2.position.set(0,0,-10);
-scene.add(light3);
 
 const camera = new THREE.PerspectiveCamera(
     75,

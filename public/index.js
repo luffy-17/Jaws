@@ -2,20 +2,15 @@
 import * as THREE from './threejs/three.module.js';
 import {STLLoader} from './threejs/STLLoader.js';
 import {OrbitControls} from './threejs/OrbitControls.js';
+import { GUI } from './threejs/dat.gui.module.js';
+
 const scene = new THREE.Scene();
 scene.add(new THREE.AxesHelper(5));
 
-const light = new THREE.SpotLight();
-light.position.set(20, 20, 20);
-scene.add(light);
+const light = new THREE.PointLight( 0xffffff, 1 );
+light.layers.enable( 0 );
+light.layers.enable( 1 );
 
-let light2 = new THREE.DirectionalLight(0xffffff);
-light.position.set(0,0,10);
-scene.add(light2);
-
-let light3 = new THREE.DirectionalLight(0xffffff);
-light2.position.set(0,0,-10);
-scene.add(light3);
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -23,7 +18,13 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 );
-camera.position.z = 10;
+
+camera.layers.enable( 0 ); // enabled by default
+camera.layers.enable( 1 );
+camera.position.set(0,0,-10);
+
+scene.add( camera );
+camera.add( light );
 
 const renderer = new THREE.WebGLRenderer();
 renderer.outputEncoding = THREE.sRGBEncoding;
@@ -60,6 +61,7 @@ loader.load(
         mesh_upperjaw.scale.set(0.1, 0.1, 0.1);
         mesh_upperjaw.position.set(0,1,0);
         mesh_upperjaw.rotation.x = -Math.PI/2;
+        mesh_upperjaw.layers.set(0);
         scene.add(mesh_upperjaw);
     },
     (xhr) => {
@@ -76,6 +78,7 @@ loader.load(
         mesh.scale.set(0.1, 0.1, 0.1);
         mesh.position.set(0,-1,0);
         mesh.rotation.x = -Math.PI/2;
+        mesh.layers.set(1);
         scene.add(mesh);
     },
     (xhr) => {
@@ -86,13 +89,49 @@ loader.load(
     }
 );
 
+const layers = {
+
+  'toggle lower': function () {
+
+    camera.layers.toggle( 0 );
+
+  },
+
+  'toggle upper': function () {
+
+    camera.layers.toggle( 1 );
+
+  },
+
+  'enable all': function () {
+
+    camera.layers.enableAll();
+
+  },
+
+  'disable all': function () {
+
+    camera.layers.disableAll();
+
+  }
+
+};
+
+const gui = new GUI();
+gui.add( layers, 'toggle lower' );
+gui.add( layers, 'toggle upper' );
+gui.add( layers, 'enable all' );
+gui.add( layers, 'disable all' );
+
 window.addEventListener('resize', onWindowResize, false);
+
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     render();
 }
+
 function animate() {
     requestAnimationFrame(animate);
 
