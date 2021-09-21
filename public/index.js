@@ -4,14 +4,10 @@ import {STLLoader} from './threejs/STLLoader.js';
 import {TrackballControls} from './threejs/TrackballControls.js';
 import { GUI } from './threejs/dat.gui.module.js';
 
+//////////////// Camera ///////////////////
 let perspectiveCamera, orthographicCamera, controls;
 const params = {orthographicCamera: false};
 const frustumSize = 100;
-
-
-//
-// light.layers.enable( 0 );
-// light.layers.enable( 1 );
 
 const aspect = window.innerWidth / window.innerHeight;
 
@@ -34,22 +30,27 @@ orthographicCamera.layers.enable( 0 ); // enabled by default
 orthographicCamera.layers.enable( 1 );
 orthographicCamera.position.set(0,0,-10);
 
-// world
+//////////////// World //////////////////////
 
 let scene = new THREE.Scene();
-scene.background = new THREE.Color(0xcccccc);
+let background = new THREE.Color(0xcccccc);
+scene.background = background;
+console.log(scene.background);
+////////////// Lights /////////////////////////
 
-const light = new THREE.DirectionalLight(0xffffff);
-light.position.set(-1, -1, -1);
+const skyColor = 0xffffff;  // light blue
+const intensity = 1;
+const light = new THREE.HemisphereLight(skyColor, intensity);
+console.log(light);
 scene.add(light);
 light.layers.enable( 0 );
 light.layers.enable( 1 );
 scene.add(new THREE.AxesHelper(5));
 
 
-
+//////////////// Object ////////////////////
 const material = new THREE.MeshPhysicalMaterial({
-    color: 0xBEC4B5,
+    color: 0xf8f8f8,
     roughness: 0.1,
 });
 
@@ -103,10 +104,15 @@ loader.load(
     }
 );
 
+////////////// Render /////////////////////////
+
 let renderer = new THREE.WebGLRenderer({});
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+/////////////////////// Layers ////////////////////
+
 const layers = {
 
   'toggle lower': function () {
@@ -141,6 +147,20 @@ const layers = {
 
 };
 
+class ColorGUIHelper {
+  constructor(object, prop) {
+    this.object = object;
+  }
+  get value() {
+    return `#${this.object.getHexString()}`;
+  }
+  set value(hexString) {
+    this.object.set(hexString);
+  }
+}
+
+///////////// GUI //////////////////////
+
 const gui = new GUI();
 gui.add( layers, 'toggle lower' );
 gui.add( layers, 'toggle upper' );
@@ -150,8 +170,11 @@ gui.add(params, 'orthographicCamera').name('use orthographic').onChange(function
   controls.dispose();
   createControls(value ? orthographicCamera : perspectiveCamera);
 });
-
+gui.addColor(new ColorGUIHelper(scene.background), 'value').name('color');
 window.addEventListener('resize', onWindowResize);
+
+///////////////////// Controls /////////////////////////
+
 createControls(perspectiveCamera);
 
 function createControls(camera) {
