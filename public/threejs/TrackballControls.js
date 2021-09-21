@@ -539,7 +539,7 @@ class TrackballControls extends EventDispatcher {
 						break;
 
 					case scope.mouseButtons.RIGHT:
-						_state = STATE.PAN;
+						_state = STATE.NONE;
 						break;
 
 					default:
