@@ -35,7 +35,6 @@ orthographicCamera.position.set(0,0,-10);
 let scene = new THREE.Scene();
 let background = new THREE.Color(0xcccccc);
 scene.background = background;
-console.log(scene.background);
 ////////////// Lights /////////////////////////
 
 const skyColor = 0xffffff;  // light blue
@@ -170,7 +169,7 @@ gui.add(params, 'orthographicCamera').name('use orthographic').onChange(function
   controls.dispose();
   createControls(value ? orthographicCamera : perspectiveCamera);
 });
-gui.addColor(new ColorGUIHelper(scene.background), 'value').name('color');
+gui.addColor(new ColorGUIHelper(scene.background), 'value').name('Background color');
 window.addEventListener('resize', onWindowResize);
 
 ///////////////////// Controls /////////////////////////
