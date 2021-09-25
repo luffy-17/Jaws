@@ -39,35 +39,22 @@ scene.background = background;
 
 const skyColor = 0xffffff;  // light blue
 const intensity = 1;
-const light = new THREE.HemisphereLight(skyColor, intensity);
-console.log(light);
+const light = new THREE.HemisphereLight(skyColor, 0x000820, intensity);
+light.position.set(0,0,1);
 scene.add(light);
 light.layers.enable( 0 );
 light.layers.enable( 1 );
+
 scene.add(new THREE.AxesHelper(5));
 
 
 //////////////// Object ////////////////////
 const material = new THREE.MeshPhysicalMaterial({
     color: 0xf8f8f8,
-    roughness: 0.1,
+    roughness: 0.2,
 });
 
 const loader = new STLLoader();
-function myFunction() {
-  // Get the checkbox
-  var checkBox = document.getElementById("myCheck");
-  console.log(checkBox);
-  // Get the output text
-  var text = document.getElementById("text");
-
-  // If the checkbox is checked, display the output text
-  if (checkBox.checked == true){
-
-  } else {
-    text.style.display = "none";
-  }
-}
 loader.load(
     '3dmodels/FWMWK-upperjaw.stl',
     function (geometry) {
@@ -76,7 +63,9 @@ loader.load(
         mesh_upperjaw.position.set(0,1,0);
         mesh_upperjaw.rotation.x = -Math.PI/2;
         mesh_upperjaw.layers.set(0);
+
         scene.add(mesh_upperjaw);
+
     },
     (xhr) => {
         console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
@@ -85,6 +74,7 @@ loader.load(
         console.log(error);
     }
 );
+
 loader.load(
     '3dmodels/FWMWK-lowerjaw.stl',
     function (geometry) {
@@ -117,7 +107,7 @@ const layers = {
   'toggle lower': function () {
 
     perspectiveCamera.layers.toggle( 0 );
-    orthographicCamera.layers.toggle(0);
+    orthographicCamera.layers.toggle( 0 );
 
   },
 
@@ -146,6 +136,37 @@ const layers = {
 
 };
 
+const positions = {
+  'toggle face': function (){
+    perspectiveCamera.position.set(0,0,-5);
+    orthographicCamera.position.set(0,0,-5);
+  },
+
+  'toggle left': function (){
+    perspectiveCamera.position.set(5,0,0);
+    orthographicCamera.position.set(5,0,0);
+  },
+
+  'toggle right': function (){
+    perspectiveCamera.position.set(-5,0,0);
+    orthographicCamera.position.set(-5,0,0);
+  },
+
+  'toggle above': function (){
+    perspectiveCamera.position.set(0,5,0);
+    orthographicCamera.position.set(0,5,0);
+    perspectiveCamera.layers.toggle( 0 );
+    orthographicCamera.layers.toggle( 0 );
+  },
+
+  'toggle bottom': function (){
+    perspectiveCamera.position.set(0,-5,0);
+    orthographicCamera.position.set(0,-5,0);
+    perspectiveCamera.layers.toggle( 1 );
+    orthographicCamera.layers.toggle( 1 );
+  },
+};
+
 class ColorGUIHelper {
   constructor(object, prop) {
     this.object = object;
@@ -171,7 +192,11 @@ gui.add(params, 'orthographicCamera').name('use orthographic').onChange(function
 });
 gui.addColor(new ColorGUIHelper(scene.background), 'value').name('Background color');
 window.addEventListener('resize', onWindowResize);
-
+gui.add( positions, 'toggle face');
+gui.add( positions, 'toggle left');
+gui.add( positions, 'toggle right');
+gui.add( positions, 'toggle above');
+gui.add( positions, 'toggle bottom');
 ///////////////////// Controls /////////////////////////
 
 createControls(perspectiveCamera);
