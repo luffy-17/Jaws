@@ -39,11 +39,13 @@ scene.background = background;
 
 const skyColor = 0xffffff;  // light blue
 const intensity = 1;
-const light = new THREE.HemisphereLight(skyColor, 0x000820, intensity);
-light.position.set(0,0,1);
-scene.add(light);
+const light = new THREE.HemisphereLight(skyColor, intensity);
 light.layers.enable( 0 );
 light.layers.enable( 1 );
+perspectiveCamera.add(light);
+orthographicCamera.add(light);
+scene.add(perspectiveCamera);
+scene.add(orthographicCamera);
 
 scene.add(new THREE.AxesHelper(5));
 
@@ -60,7 +62,7 @@ loader.load(
     function (geometry) {
         const mesh_upperjaw = new THREE.Mesh(geometry, material);
         mesh_upperjaw.scale.set(0.1, 0.1, 0.1);
-        mesh_upperjaw.position.set(0,1,0);
+        mesh_upperjaw.position.set(0,0,0);
         mesh_upperjaw.rotation.x = -Math.PI/2;
         mesh_upperjaw.layers.set(0);
 
@@ -80,7 +82,7 @@ loader.load(
     function (geometry) {
         const mesh = new THREE.Mesh(geometry, material);
         mesh.scale.set(0.1, 0.1, 0.1);
-        mesh.position.set(0,-1,0);
+        mesh.position.set(0,-0.5,0);
         mesh.rotation.x = -Math.PI/2;
         mesh.layers.set(1);
         scene.add(mesh);
@@ -105,14 +107,16 @@ document.body.appendChild(renderer.domElement);
 const layers = {
 
   'toggle lower': function () {
-
+    perspectiveCamera.layers.enableAll();
+    orthographicCamera.layers.enableAll();
     perspectiveCamera.layers.toggle( 0 );
     orthographicCamera.layers.toggle( 0 );
 
   },
 
   'toggle upper': function () {
-
+    perspectiveCamera.layers.enableAll();
+    orthographicCamera.layers.enableAll();
     perspectiveCamera.layers.toggle( 1 );
     orthographicCamera.layers.toggle( 1 );
 
@@ -137,29 +141,35 @@ const layers = {
 };
 
 const positions = {
-  'toggle face': function (){
-    perspectiveCamera.position.set(0,0,-5);
-    orthographicCamera.position.set(0,0,-5);
+  'front view': function (){
+    perspectiveCamera.position.set(0,0,-10);
+    orthographicCamera.position.set(0,0,-10);
+    perspectiveCamera.layers.enableAll();
+    orthographicCamera.layers.enableAll();
   },
 
-  'toggle left': function (){
+  'left view': function (){
     perspectiveCamera.position.set(5,0,0);
     orthographicCamera.position.set(5,0,0);
   },
 
-  'toggle right': function (){
+  'right view': function (){
     perspectiveCamera.position.set(-5,0,0);
     orthographicCamera.position.set(-5,0,0);
   },
 
-  'toggle above': function (){
+  'from above': function (){
+    perspectiveCamera.layers.enableAll();
+    orthographicCamera.layers.enableAll();
     perspectiveCamera.position.set(0,5,0);
     orthographicCamera.position.set(0,5,0);
     perspectiveCamera.layers.toggle( 0 );
     orthographicCamera.layers.toggle( 0 );
   },
 
-  'toggle bottom': function (){
+  'from down': function (){
+    perspectiveCamera.layers.enableAll();
+    orthographicCamera.layers.enableAll();
     perspectiveCamera.position.set(0,-5,0);
     orthographicCamera.position.set(0,-5,0);
     perspectiveCamera.layers.toggle( 1 );
@@ -187,19 +197,21 @@ gui.add( layers, 'toggle upper' );
 gui.add( layers, 'enable all' );
 gui.add( layers, 'disable all' );
 gui.add(params, 'orthographicCamera').name('use orthographic').onChange(function(value) {
-  controls.dispose();
   createControls(value ? orthographicCamera : perspectiveCamera);
 });
-gui.addColor(new ColorGUIHelper(scene.background), 'value').name('Background color');
+gui.addColor(new ColorGUIHelper(scene.background), 'value').name('Background color: ');
 window.addEventListener('resize', onWindowResize);
-gui.add( positions, 'toggle face');
-gui.add( positions, 'toggle left');
-gui.add( positions, 'toggle right');
-gui.add( positions, 'toggle above');
-gui.add( positions, 'toggle bottom');
+gui.add( positions, 'front view');
+gui.add( positions, 'left view');
+gui.add( positions, 'right view');
+gui.add( positions, 'from above');
+gui.add( positions, 'from down');
+
+
 ///////////////////// Controls /////////////////////////
 
 createControls(perspectiveCamera);
+
 
 function createControls(camera) {
 
